@@ -1,0 +1,4 @@
+#!/bin/bash
+#sudo sensors
+sudo hddtemp /dev/sda /dev/sdb /dev/sdc /dev/sdd /dev/sde /dev/sdf /dev/sdg /dev/sdh
+

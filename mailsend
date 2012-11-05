@@ -1,0 +1,5 @@
+#!/bin/bash
+echo $1 > ./.temp_mail
+nail 5551212@txt.att.net < ./.temp_mail
+rm ./.temp_mail
+

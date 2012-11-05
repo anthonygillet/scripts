@@ -1,0 +1,41 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+use ZoneMinder;
+
+$| = 1;
+
+zmDbgInit( "myscript", level=>0, to_log=>0, to_syslog=>0, to_term=>1 );
+
+my $dbh = DBI->connect( "DBI:mysql:database=zm;host=localhost", "", "" );
+
+my $sql = "select M.*, max(E.Id) as LastEventId from Monitors as M left join Events as E on M.Id = E.MonitorId where M.Function != 'None' group by (M.Id)";
+my $sth = $dbh->prepare_cached( $sql ) or die( "Can't prepare '$sql': ".$dbh->errstr() );
+
+my $res = $sth->execute() or die( "Can't execute '$sql': ".$sth->errstr() );
+my @monitors;
+while ( my $monitor = $sth->fetchrow_hashref() )
+{
+    push( @monitors, $monitor );
+}
+
+while( 1 )
+{
+    foreach my $monitor (@monitors)
+    {
+        next if (!zmMemVerify($monitor));
+
+        if (zmIsAlarmed($monitor))
+        {
+            print("Motion detected on ".$monitor->{Name}."!\n");
+            system("/home/anthony/scripts/mailsend \"Motion detected on ".$monitor->{Name}."!\n\"");
+            while (zmIsAlarmed($monitor))
+            {
+                sleep(1);
+            }
+        }
+    }
+    sleep( 1 );
+}
+

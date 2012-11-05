@@ -1,0 +1,7 @@
+#!/bin/bash
+
+while true; do
+	ssh -p 2222 -L 15900:10.1.30.150:5900 anthony@localhost
+	sleep 10
+done
+
